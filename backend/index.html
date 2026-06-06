@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScalpGuard AI Control Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div class="max-w-2xl w-full bg-slate-800 rounded-xl shadow-2xl border border-slate-700 p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">🛡️ ScalpGuard AI Firewall</h1>
+            <p class="text-slate-400">Real-time Perimeter Behavioral Verification Simulator</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <button onclick="sendRequest('human')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-6 rounded-lg shadow transition transform active:scale-95 text-center">
+                👤 Simulate Human Booking
+                <span class="block text-xs font-normal text-emerald-200 mt-1">Normal behavior signature</span>
+            </button>
+            <button onclick="sendRequest('bot')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-4 px-6 rounded-lg shadow transition transform active:scale-95 text-center">
+                🤖 Launch Bot Assault
+                <span class="block text-xs font-normal text-rose-200 mt-1">High-frequency script signature</span>
+            </button>
+        </div>
+
+        <div class="bg-slate-950 rounded-lg p-5 font-mono text-sm border border-slate-800">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3 text-slate-500 text-xs">
+                <span>SIMULATION OUTPUT LOGS</span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
+            <div id="terminal-logs" class="space-y-3 min-h-[180px] max-h-[300px] overflow-y-auto">
+                <p class="text-slate-500">// System initialized. Awaiting network activity...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendRequest(type) {
+            const logsContainer = document.getElementById('terminal-logs');
+            
+            const payload = {
+                email: type === 'human' ? 'sushma.authentic.buyer@gmail.com' : 'bot-net-attacker-v4_node9@scalperops.net',
+                itemId: 1,
+                telemetry: type === 'human' 
+                    ? { requestVelocity: 1, intervalVariance: 450 } 
+                    : { requestVelocity: 45, intervalVariance: 2 }
+            };
+
+            logsContainer.innerHTML = `<p class="text-blue-400">⚡ INITIATING LIVE ${type.toUpperCase()} BOOKING REQUEST...</p>`;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/book-ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                
+                if (response.status === 200) {
+                    logsContainer.innerHTML += `
+                        <p class="text-slate-300">HTTP Status: <span class="text-emerald-400 font-bold">200 OK</span></p>
+                        <p class="text-emerald-400 font-bold bg-emerald-950/50 p-2 rounded border border-emerald-900/50">
+                            🟢 [PASSED] ${data.message}
+                        </p>
+                    `;
+                } else {
+                    logsContainer.innerHTML += `
+                        <p class="text-slate-300">HTTP Status: <span class="text-rose-400 font-bold">${response.status}</span></p>
+                        <p class="text-rose-400 font-bold bg-rose-950/50 p-2 rounded border border-rose-900/50">
+                            🔴 [BLOCKED] ${data.message || 'Request dropped due to security protocol.'}
+                        </p>
+                    `;
+                }
+            } catch (error) {
+                logsContainer.innerHTML += `
+                    <p class="text-rose-500 font-bold">❌ Connection Failure: Make sure node server.js is running on Port 5000!</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
